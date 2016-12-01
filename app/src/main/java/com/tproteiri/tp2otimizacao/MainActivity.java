@@ -15,9 +15,20 @@ import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 
+import com.squareup.okhttp.Interceptor;
+import com.squareup.okhttp.OkHttpClient;
+import com.squareup.okhttp.Request;
+import com.squareup.okhttp.Response;
 import com.tproteiri.tp2otimizacao.adapters.CitiesAdapter;
 import com.tproteiri.tp2otimizacao.models.City;
+import com.tproteiri.tp2otimizacao.rest.ApiService;
 import com.tproteiri.tp2otimizacao.utils.CacheMemory;
+
+import java.io.IOException;
+
+import retrofit.GsonConverterFactory;
+import retrofit.Retrofit;
+import retrofit.RxJavaCallAdapterFactory;
 
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener, OnCitySelectListener {
@@ -26,6 +37,7 @@ public class MainActivity extends AppCompatActivity
     private RecyclerView.Adapter mAdapter;
     private RecyclerView.LayoutManager mLayoutManager;
     private FloatingActionButton mFab;
+    private Retrofit mRetrofit;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -33,6 +45,8 @@ public class MainActivity extends AppCompatActivity
         setContentView(R.layout.activity_main);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
+
+        setupRestClient();
 
         mFab = (FloatingActionButton) findViewById(R.id.fab);
         mFab.setOnClickListener(new View.OnClickListener() {
@@ -120,6 +134,43 @@ public class MainActivity extends AppCompatActivity
     public void onClick(City city) {
         CacheMemory.setParam(city);
         startActivity(new Intent(this, SelectActivity.class));
+    }
+
+    public void onCalculate(View view) {
+        mRetrofit.create(ApiService.class)
+                .hello().filter(jsonObject -> jsonObject.get("code").getAsInt()==0)
+                .map(jsonObject1 -> jsonObject1.get("data"))
+                .subscribe(System.out::println);
+    }
+
+    private void setupRestClient() {
+        OkHttpClient client = new OkHttpClient();
+        client.interceptors().add(new LoggingInterceptor());
+
+        mRetrofit = new Retrofit.Builder().baseUrl(ApiService.END).client(client)
+                .addConverterFactory(GsonConverterFactory.create())
+                .addCallAdapterFactory(RxJavaCallAdapterFactory.create())
+                .build();
+    }
+
+    static class LoggingInterceptor implements Interceptor {
+        @Override public Response intercept(Chain chain) throws IOException {
+            Request request = chain.request();
+
+            long t1 = System.nanoTime();
+            System.out.println(
+                    String.format("Sending request %s on %s%n%s", request.url(), chain.connection(),
+                            request.headers()));
+
+            Response response = chain.proceed(request);
+
+            long t2 = System.nanoTime();
+            System.out.println(
+                    String.format("Received response for %s in %.1fms%n%s", response.request().url(),
+                            (t2 - t1) / 1e6d, response.headers()));
+
+            return response;
+        }
     }
 }
 

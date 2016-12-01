@@ -43,6 +43,7 @@
         android:layout_margin="20dp"
         android:id="@+id/button"
         android:textSize="18dp"
+        android:onClick="onCalculate"
         android:textColor="@android:color/white"
         android:background="@color/colorAccent"/>
 
