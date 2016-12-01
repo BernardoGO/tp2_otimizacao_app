@@ -7,6 +7,7 @@ import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
+import android.widget.Button;
 import android.widget.EditText;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
@@ -27,12 +28,14 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     private GoogleMap mMap;
     private Address mAddress;
     private LatLng mLatLong;
+    private Button mSelectBtn;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_maps);
-
+        mSelectBtn = (Button) findViewById(R.id.select);
+        mSelectBtn.setEnabled(false);
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
@@ -43,14 +46,14 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         mMap = googleMap;
 
         mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(
-                new LatLng(-18.142, 178.431), 2));
+                new LatLng(-19.939764, -43.949337), 2));
 
-        mMap.addPolyline(new PolylineOptions().geodesic(true)
-                .add(new LatLng(-33.866, 151.195))
-                .add(new LatLng(-18.142, 178.431))
-                .add(new LatLng(21.291, -157.821))
-                .add(new LatLng(37.423, -122.091))
-                .add(new LatLng(-33.866, 151.195)));
+//        mMap.addPolyline(new PolylineOptions().geodesic(true)
+//                .add(new LatLng(-33.866, 151.195))
+//                .add(new LatLng(-18.142, 178.431))
+//                .add(new LatLng(21.291, -157.821))
+//                .add(new LatLng(37.423, -122.091))
+//                .add(new LatLng(-33.866, 151.195)));
     }
 
     public void onMapSearch(View view) {
@@ -64,7 +67,9 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         Geocoder geocoder = new Geocoder(this);
         try {
             addressList = geocoder.getFromLocationName(location, 1);
+            mSelectBtn.setEnabled(true);
         } catch (IOException e) {
+            mSelectBtn.setEnabled(false);
             e.printStackTrace();
         }
 

@@ -1,7 +1,6 @@
 package com.tproteiri.tp2otimizacao;
 
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.widget.DrawerLayout;
@@ -17,9 +16,11 @@ import android.view.Menu;
 import android.view.MenuItem;
 
 import com.tproteiri.tp2otimizacao.adapters.CitiesAdapter;
+import com.tproteiri.tp2otimizacao.models.City;
 import com.tproteiri.tp2otimizacao.utils.CacheMemory;
 
-public class MainActivity extends AppCompatActivity  implements NavigationView.OnNavigationItemSelectedListener {
+public class MainActivity extends AppCompatActivity
+        implements NavigationView.OnNavigationItemSelectedListener, OnCitySelectListener {
 
     private RecyclerView mRecyclerView;
     private RecyclerView.Adapter mAdapter;
@@ -59,7 +60,7 @@ public class MainActivity extends AppCompatActivity  implements NavigationView.O
     @Override
     protected void onResume() {
         super.onResume();
-        mAdapter = new CitiesAdapter(CacheMemory.getCities());
+        mAdapter = new CitiesAdapter(CacheMemory.getCities(), this);
         mRecyclerView.setAdapter(mAdapter);
     }
 
@@ -113,6 +114,12 @@ public class MainActivity extends AppCompatActivity  implements NavigationView.O
         drawer.closeDrawer(GravityCompat.START);
 
         return true;
+    }
+
+    @Override
+    public void onClick(City city) {
+        CacheMemory.setParam(city);
+        startActivity(new Intent(this, SelectActivity.class));
     }
 }
 

@@ -7,20 +7,21 @@ import android.view.ViewGroup;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
-import com.tproteiri.tp2otimizacao.OnCitySelectListener;
+import com.tproteiri.tp2otimizacao.OnSelectLinkListener;
 import com.tproteiri.tp2otimizacao.R;
 import com.tproteiri.tp2otimizacao.models.City;
-import com.tproteiri.tp2otimizacao.utils.CacheMemory;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
  * Created by josue on 11/30/16.
  */
-public class CitiesAdapter extends RecyclerView.Adapter<CitiesAdapter.ViewHolder> {
+
+public class SelectAdapter extends RecyclerView.Adapter<SelectAdapter.ViewHolder> {
 
     private List<City> mDataset;
-    private OnCitySelectListener listener;
+    private OnSelectLinkListener listener;
 
     static class ViewHolder extends RecyclerView.ViewHolder {
 
@@ -34,34 +35,33 @@ public class CitiesAdapter extends RecyclerView.Adapter<CitiesAdapter.ViewHolder
         }
     }
 
-    public CitiesAdapter(List<City> myDataset, OnCitySelectListener listener) {
-        mDataset = myDataset;
+    public SelectAdapter(City city, List<City> myDataset, OnSelectLinkListener listener) {
+        mDataset = new ArrayList<>();
+        for (City c : myDataset) {
+            if (!c.getLocality().equals(city.getLocality()) && !city.hasLink(c))
+                mDataset.add(c);
+        }
         this.listener = listener;
     }
 
     @Override
-    public CitiesAdapter.ViewHolder onCreateViewHolder(ViewGroup parent,
-                                                   int viewType) {
+    public SelectAdapter.ViewHolder onCreateViewHolder(ViewGroup parent,
+                                                       int viewType) {
         View v = LayoutInflater.from(parent.getContext())
                 .inflate(R.layout.city_view, parent, false);
 
-        return new ViewHolder(v);
+        return new SelectAdapter.ViewHolder(v);
     }
 
     @Override
-    public void onBindViewHolder(ViewHolder holder, final int position) {
+    public void onBindViewHolder(SelectAdapter.ViewHolder holder, final int position) {
+        holder.mRemove.setVisibility(View.GONE);
         holder.mTextView.setText(mDataset.get(position).getLocality());
-        holder.mRemove.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                CacheMemory.removeCity(position);
-                CitiesAdapter.this.notifyDataSetChanged();
-            }
-        });
+
         holder.mTextView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                listener.onClick(mDataset.get(position));
+                listener.onSelectLink(mDataset.get(position));
             }
         });
     }
@@ -70,6 +70,5 @@ public class CitiesAdapter extends RecyclerView.Adapter<CitiesAdapter.ViewHolder
     public int getItemCount() {
         return mDataset.size();
     }
+
 }
-
-
