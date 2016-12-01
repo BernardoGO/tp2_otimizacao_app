@@ -48,12 +48,17 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(
                 new LatLng(-19.939764, -43.949337), 2));
 
-//        mMap.addPolyline(new PolylineOptions().geodesic(true)
-//                .add(new LatLng(-33.866, 151.195))
-//                .add(new LatLng(-18.142, 178.431))
-//                .add(new LatLng(21.291, -157.821))
-//                .add(new LatLng(37.423, -122.091))
-//                .add(new LatLng(-33.866, 151.195)));
+        for (City c1 : CacheMemory.getCities()) {
+            if (c1.getLinks() != null) {
+                for (City c2 : c1.getLinks().keySet()) {
+                    PolylineOptions poly = new PolylineOptions().geodesic(true);
+                    poly.add(new LatLng(c1.getLatitude(), c1.getLongitude()));
+                    poly.add(new LatLng(c2.getLatitude(), c2.getLongitude()));
+                    mMap.addPolyline(poly);
+                }
+            }
+        }
+
     }
 
     public void onMapSearch(View view) {
@@ -77,7 +82,11 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         LatLng latLng = new LatLng(address.getLatitude(), address.getLongitude());
         mLatLong = latLng;
         mAddress = address;
-        mMap.addMarker(new MarkerOptions().position(latLng).title("Marker"));
+
+        if (address != null && addressList != null && addressList.get(0) != null) {
+            mMap.addMarker(new MarkerOptions().position(latLng).title(address.getLocality()));
+        }
+
         mMap.animateCamera(CameraUpdateFactory.newLatLng(latLng));
     }
 
